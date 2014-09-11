@@ -1,3 +1,9 @@
 *.tar.xz
 *.byte
+# gcc temporary files
+*.s
+*.ii
+# symlinks to trik runtime
+/libs
+/trikRuntime
 

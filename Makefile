@@ -1,27 +1,29 @@
-ifdef OCAMLROOT
-OCAMLWHERE=$(OCAMLROOT)/byterun
-CC=/usr/bin/arm-linux-gnueabi-gcc
-NM=/usr/bin/arm-linux-gnueabi-nm
-OCAMLC2=$(OCAMLROOT)/byterun/ocamlrun $(OCAMLROOT)/ocamlc -I $(OCAMLROOT)/stdlib
-OCAMLC=ocamlc
-OCAML_HEADERS_DIR=$(OCAMLROOT)/byterun
-THREADS_DIR=$(OCAMLROOT)/otherlibs/threads
+OCAMLDIST=~/trik/ocaml-dist  # where cross-ocaml is installed
 
-else
-OCAMLWHERE=`ocamlc -where`
-CC=cc
-NM=nm
+MY_LLP=LD_LIBRARY_PATH=/opt/trik-sdk/sysroots/armv5te-oe-linux-gnueabi/lib
+OCAMLWHERE=$(shell $(MY_LLP) $(OCAMLDIST)/bin/ocamlc -where)
+OCAMLC_TARGET=$(MY_LLP) $(OCAMLDIST)/bin/ocamlc
 OCAMLC=ocamlc
-OCAMLC2=$(OCAMLC)
 OCAML_HEADERS_DIR=$(OCAMLWHERE)/caml
 THREADS_DIR=$(OCAMLWHERE)/vmthreads
-endif
+CXXFLAGS=-std=c++11 -ItrikRuntime/trikControl/include
+OCAMLC_TARGET_OPTS=-custom -cc "$(CC)" \
+	-ccopt -L$(THREADS_DIR)  $(THREADS_DIR)/threads.cma \
+	-cclib -lstdc++
+OCAMLC_TARGET_OPTS += $(addprefix -cclib ,$(shell pkg-config --libs QtGuiE) )
+OCAMLC_TARGET_OPTS += -ccopt -Llibs -cclib -ltrikControl
+
+OCAML_CXXFLAGS =  $(addprefix -ccopt , $(CXXFLAGS) )
+OCAML_CXXFLAGS += $(addprefix -ccopt , $(shell pkg-config --cflags QtGuiE) )
+OCAML_CXXFLAGS += -ccopt -I$(OCAML_HEADERS_DIR) -ccopt -I$(OCAMLWHERE)/threads/ -ccopt -save-temps
 
 all: hello.tar.xz
 
 wrap.o: wrap.c
-	$(OCAMLC) -cc $(CC) -ccopt -I$(OCAML_HEADERS_DIR) -c $< -o $@
-	$(NM) $@
+	$(OCAMLC) -cc "$(CXX)" $(OCAML_CXXFLAGS) \
+	-ccopt -ItrikRuntime/trikControl/include/ -ccopt -I$(OCAML_HEADERS_DIR) -c $< -o $@
+	#file  $@
+	#$(NM) $@
 
 funs.cmo: funs.ml
 	$(OCAMLC) -c $< -o $@
@@ -30,7 +32,7 @@ hello.cmo: hello.ml
 	$(OCAMLC) -c -vmthread $< -o $@
 
 hello.byte: wrap.o funs.cmo hello.cmo
-	$(OCAMLC2) -custom -ccopt -static -ccopt -L$(THREADS_DIR)  -cclib -lvmthreads $(THREADS_DIR)/threads.cma $^ -o $@ -verbose
+	$(OCAMLC_TARGET) $(OCAMLC_TARGET_OPTS) $^ -o $@ -verbose
 
 hello.tar.xz: hello.byte
 	tar --xz -cf threads.tar.xz hello.byte
