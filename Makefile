@@ -1,4 +1,5 @@
-OCAMLDIST=~/trik/ocaml-dist  # where cross-ocaml is installed
+# OCAMLDIST is  where cross-ocaml is installed
+OCAMLDIST=~/trik/ocaml-dist
 
 MY_LLP=LD_LIBRARY_PATH=/opt/trik-sdk/sysroots/armv5te-oe-linux-gnueabi/lib
 OCAMLWHERE=$(shell $(MY_LLP) $(OCAMLDIST)/bin/ocamlc -where)
@@ -32,10 +33,11 @@ hello.cmo: hello.ml
 	$(OCAMLC) -c -vmthread $< -o $@
 
 hello.byte: wrap.o funs.cmo hello.cmo
-	$(OCAMLC_TARGET) $(OCAMLC_TARGET_OPTS) $^ -o $@ -verbose
+	$(OCAMLC_TARGET) $(OCAMLC_TARGET_OPTS) $^ -o $@
 
 hello.tar.xz: hello.byte
 	tar --xz -cf threads.tar.xz hello.byte
+	cp hello.byte ~/h
 
 clean:
 	rm -fr *.o *.cm[ioax] hello.byte

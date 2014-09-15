@@ -9,6 +9,7 @@ extern "C" {
 
 
 #include <trikControl/brick.h>
+#include <QtCore/QDebug>
 #include <QtGui/QApplication>
 
 using namespace trikControl;
@@ -58,10 +59,10 @@ extern "C" value caml_qapp_exec(value _app) {
     CAMLparam1(_app);
 
     QApplication *app = (QApplication*) (Field(_app,0));
-    //qDebug() << "App exec. ENTER blocking section" << __FILE__ ;
-    //caml_enter_blocking_section();
-    caml_release_runtime_system();
+    qDebug() << "App exec. release runtime " << __FILE__ ;
+    caml_enter_blocking_section();
     app->exec();
+    caml_leave_blocking_section();
     CAMLreturn(Val_int(0) );
 }
 // external create: QApplication.t -> string -> string -> Brick.t
