@@ -6,7 +6,8 @@ extern "C" {
 #include <alloc.h>
 }
 
-
+#include <string>
+#include <iostream>
 #include <QtCore/QDebug>
 #include <QApplication>
 
@@ -23,20 +24,15 @@ extern "C" {
 extern "C" value caml_test_xxx(value _argv, value _cb) {
   CAMLparam2(_argv, _cb);
   CAMLlocal2(_ctx, _cb_res);
-  //qDebug() << "App exec. inside C++. "<<__FILE__<< ", line " << __LINE__ ;
-  caml_enter_blocking_section();
 
   ARGC_N_ARGV(_argv, copy);
   QApplication app(*argc, copy);
 
-  caml_leave_blocking_section();
   _cb_res = caml_callback(_cb, Val_unit);
+  Q_ASSERT(_cb_res == Val_unit);
   caml_enter_blocking_section();
 
-  Q_ASSERT(_cb_res == Val_unit);
-
   qDebug() << "executing app.exec()";
-  //for (;;) ;
   app.exec();
   caml_leave_blocking_section();
   CAMLreturn(Val_unit);

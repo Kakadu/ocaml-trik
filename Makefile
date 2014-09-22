@@ -1,7 +1,7 @@
 NM=nm
 OCAMLWHERE=`ocamlc -where`
-OCAMLC=ocamlfind c -verbose -package threads -vmthread
-OCAMLOPT=ocamlfind opt -verbose -package threads -thread
+OCAMLC=ocamlfind     c -cc g++ -verbose -package threads -vmthread
+OCAMLOPT=ocamlfind opt -cc g++ -verbose -package threads -thread
 
 OCAML_HEADERS_DIR=$(OCAMLWHERE)/caml
 THREADS_DIR=$(OCAMLWHERE)/vmthreads
@@ -40,11 +40,11 @@ hello.cmx: hello.ml
 
 hello.byte: wrap.o funs.cmo hello.cmo
 	echo linking byte code
-	$(OCAMLC) -custom -linkpkg $(OCAMLC_CLINK_OPTS) $^ -o $@
+	$(OCAMLC) -custom -linkpkg $^ $(OCAMLC_CLINK_OPTS)  -o $@
 
 hello.native: wrap.o funs.cmx hello.cmx
 	echo linking native code
-	$(OCAMLOPT) -linkpkg -cc g++ $(OCAMLC_CLINK_OPTS) $^ -o $@
+	$(OCAMLOPT) -linkpkg -cc g++ $^ $(OCAMLC_CLINK_OPTS) -o $@
 
 
 hello.tar.xz: hello.byte
