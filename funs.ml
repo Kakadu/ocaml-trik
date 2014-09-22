@@ -8,4 +8,4 @@ module QApplication = struct
 end
                       *)
 
-external run_with_qapplication : string array -> (unit -> unit) -> unit = "caml_run_QQmlApplicationEngine"
+external run_with_qapplication : string array -> (unit -> unit) -> unit = "caml_test_xxx"

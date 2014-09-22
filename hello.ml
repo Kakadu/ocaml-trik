@@ -17,7 +17,7 @@ let find_wall () =
 let () =
 
   let init () =
-    let thread_ids =
+    let _thread_ids =
       [| Thread.create say_hello 0
        ; Thread.create find_wall ()
         |]
