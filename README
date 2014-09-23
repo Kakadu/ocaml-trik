@@ -1,0 +1,14 @@
+Demo for testing threads and custom bytecode runtime
+
+run `make hello.byte hello.native` to compile with Qt4
+run `QTMODULES=Qt5Widgets make hello.byte helo.native` to compile with Qt5
+
+
+Issue:
+It seems when we do caml_enter_blocking_section in bytecode runtime OCaml threads doesn't
+get execution time
+With native code everything is fine
+
+N.B. There are some crashes in native code version. I have experienced this in some versions of Qt,
+on other ones everything is OK. Don't know for sure what does it mean.
+
