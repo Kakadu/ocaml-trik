@@ -1,0 +1,349 @@
+diff --git a/Makefile b/Makefile
+index 10c80d2..d4ac8a0 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,4 +1,4 @@
+-#########################################################################
++########################################################################
+ #                                                                       #
+ #                                 OCaml                                 #
+ #                                                                       #
+@@ -15,17 +15,18 @@
+ include config/Makefile
+ include stdlib/StdlibModules
+ 
+-CAMLC=boot/ocamlrun boot/ocamlc -nostdlib -I boot
+-CAMLOPT=boot/ocamlrun ./ocamlopt -nostdlib -I stdlib -I otherlibs/dynlink
++MY_LLP=LD_LIBRARY_PATH=/opt/trik-sdk/sysroots/armv5te-oe-linux-gnueabi/lib:${LD_LIBRARY_PATH}
++CAMLC=$(MY_LLP) boot/ocamlrun boot/ocamlc -nostdlib -I boot
++CAMLOPT=$(MY_LLP) boot/ocamlrun ./ocamlopt -nostdlib -I stdlib -I otherlibs/dynlink
+ COMPFLAGS=-strict-sequence -w +33..39 -warn-error A $(INCLUDES)
+ LINKFLAGS=
+ 
+-CAMLYACC=boot/ocamlyacc
++CAMLYACC=$(MY_LLP) boot/ocamlyacc
+ YACCFLAGS=-v
+-CAMLLEX=boot/ocamlrun boot/ocamllex
+-CAMLDEP=boot/ocamlrun tools/ocamldep
++CAMLLEX=$(MY_LLP) boot/ocamlrun boot/ocamllex
++CAMLDEP=$(MY_LLP) boot/ocamlrun tools/ocamldep
+ DEPFLAGS=$(INCLUDES)
+-CAMLRUN=byterun/ocamlrun
++CAMLRUN=$(MY_LLP) byterun/ocamlrun
+ SHELL=/bin/sh
+ MKDIR=mkdir -p
+ 
+@@ -585,7 +586,7 @@ beforedepend:: asmcomp/emit.ml
+ 
+ tools/cvt_emit: tools/cvt_emit.mll
+ 	cd tools; \
+-	$(MAKE) CAMLC="../$(CAMLRUN) ../boot/ocamlc -I ../stdlib" cvt_emit
++	$(MAKE) CAMLC="$(MY_LLP) ../byterun/ocamlrun ../boot/ocamlc -I ../stdlib" cvt_emit
+ 
+ # The "expunge" utility
+ 
+@@ -762,7 +763,7 @@ partialclean::
+ 
+ checkstack:
+ 	@if $(BYTECC) -o tools/checkstack tools/checkstack.c; \
+-	  then tools/checkstack; \
++	  then $(MY_LLP) tools/checkstack; \
+ 	  else :; \
+ 	fi
+ 	@rm -f tools/checkstack
+diff --git a/build/boot.sh b/build/boot.sh
+index c0d49a2..ec0fdfb 100755
+--- a/build/boot.sh
++++ b/build/boot.sh
+@@ -19,21 +19,25 @@ TAG_LINE='true: -use_stdlib'
+ # If you modify this list, modify it also in camlp4-native-only.sh
+ STDLIB_MODULES='Pervasives,Arg,Array,Buffer,Char,Digest,Filename,Format,Hashtbl,Lazy,Lexing,List,Map,Printexc,Printf,Scanf,Set,String,Sys,Parsing,Int32,Int64,Nativeint,Obj,Queue,Sort,Stream,Stack'
+ 
+-./boot/ocamlrun boot/myocamlbuild.boot -ignore "$STDLIB_MODULES" \
++export LD_LIBRARY_PATH=/opt/trik-sdk/sysroots/armv5te-oe-linux-gnueabi/lib
++$MY_LLP ./boot/ocamlrun boot/myocamlbuild.boot -ignore "$STDLIB_MODULES" \
+   -tag-line "$TAG_LINE" \
+   boot/stdlib.cma boot/std_exit.cmo
+ 
+-boot/ocamlrun boot/myocamlbuild.boot \
++$MY_LLP boot/ocamlrun boot/myocamlbuild.boot \
+   -tag-line "$TAG_LINE" -log _boot_log1 \
+   ocamlbuild/ocamlbuildlightlib.cma ocamlbuild/ocamlbuildlight.byte
+ 
+ rm -f _build/myocamlbuild
+ 
+-boot/ocamlrun boot/myocamlbuild.boot \
++$MY_LLP boot/ocamlrun boot/myocamlbuild.boot \
+   -just-plugin -install-lib-dir _build/ocamlbuild -byte-plugin
+ 
+ cp _build/myocamlbuild boot/myocamlbuild
+ 
+-./boot/ocamlrun boot/myocamlbuild \
++$MY_LLP ./boot/ocamlrun boot/myocamlbuild \
+   -tag-line "$TAG_LINE" \
+   $@ -log _boot_log2 boot/camlheader ocamlc
++
++
++
+diff --git a/build/camlp4-byte-only.sh b/build/camlp4-byte-only.sh
+index cbfe05c..f3036fd 100755
+--- a/build/camlp4-byte-only.sh
++++ b/build/camlp4-byte-only.sh
+@@ -16,4 +16,5 @@ set -e
+ cd `dirname $0`/..
+ . build/targets.sh
+ set -x
++export LD_LIBRARY_PATH=/opt/trik-sdk/sysroots/armv5te-oe-linux-gnueabi/lib
+ $OCAMLBUILD $@ byte_stdlib_mixed_mode $OCAMLC_BYTE $OCAMLLEX_BYTE $CAMLP4_BYTE
+diff --git a/build/ocamlbuild-byte-only.sh b/build/ocamlbuild-byte-only.sh
+index aeb5bcb..0cdfa9e 100755
+--- a/build/ocamlbuild-byte-only.sh
++++ b/build/ocamlbuild-byte-only.sh
+@@ -16,4 +16,5 @@ set -e
+ cd `dirname $0`/..
+ . build/targets.sh
+ set -x
+-$OCAMLBUILD $@ byte_stdlib_mixed_mode $OCAMLC_BYTE $OCAMLLEX_BYTE $OCAMLBUILD_BYTE
++export LD_LIBRARY_PATH=/opt/trik-sdk/sysroots/armv5te-oe-linux-gnueabi/lib
++$OCAMLBUILD $@ byte_stdlib_mixed_mode $OCAMLC_BYTE $OCAMLLEX_BYTE $OCAMLBUILD_BYTE 
+diff --git a/build/ocamlbuild-native-only.sh b/build/ocamlbuild-native-only.sh
+index 4d7decf..5678fc3 100755
+--- a/build/ocamlbuild-native-only.sh
++++ b/build/ocamlbuild-native-only.sh
+@@ -16,4 +16,5 @@ set -e
+ cd `dirname $0`/..
+ . build/targets.sh
+ set -x
+-$OCAMLBUILD $@ native_stdlib_mixed_mode $OCAMLOPT_BYTE $OCAMLLEX_BYTE $OCAMLBUILD_NATIVE
++export LD_LIBRARY_PATH=/opt/trik-sdk/sysroots/armv5te-oe-linux-gnueabi/lib
++$OCAMLBUILD $@ native_stdlib_mixed_mode $OCAMLOPT_BYTE $OCAMLLEX_BYTE $OCAMLBUILD_NATIVE 
+diff --git a/build/ocamlbuildlib-native-only.sh b/build/ocamlbuildlib-native-only.sh
+index 285c561..51fece5 100755
+--- a/build/ocamlbuildlib-native-only.sh
++++ b/build/ocamlbuildlib-native-only.sh
+@@ -16,4 +16,6 @@ set -e
+ cd `dirname $0`/..
+ . build/targets.sh
+ set -x
++export LD_LIBRARY_PATH=/opt/trik-sdk/sysroots/armv5te-oe-linux-gnueabi:/opt/trik-sdk/sysroots/armv5te-oe-linux-gnueabi/lib
++
+ $OCAMLBUILD $@ native_stdlib_mixed_mode $OCAMLOPT_BYTE $OCAMLLEX_BYTE $OCAMLBUILDLIB_NATIVE
+diff --git a/config/auto-aux/runtest b/config/auto-aux/runtest
+index c8d7c43..cc50704 100755
+--- a/config/auto-aux/runtest
++++ b/config/auto-aux/runtest
+@@ -13,10 +13,8 @@
+ #                                                                       #
+ #########################################################################
+ 
+-if test "$verbose" = yes; then
+ echo "runtest: $cc -o tst $* $cclibs" >&2
++#set -x
+ $cc -o tst $* $cclibs || exit 100
+-else
+-$cc -o tst $* $cclibs 2> /dev/null || exit 100
+-fi
+-exec ./tst
++
++LD_LIBRARY_PATH=/opt/trik-sdk/sysroots/armv5te-oe-linux-gnueabi/lib exec ./tst
+diff --git a/configure b/configure
+index 07b1c35..1ae7a15 100755
+--- a/configure
++++ b/configure
+@@ -904,7 +904,7 @@ fi
+ 
+ # Configuration for the libraries
+ 
+-otherlibraries="unix str num dynlink bigarray"
++otherlibraries="unix str dynlink bigarray"
+ 
+ # For the Unix library
+ 
+diff --git a/debugger/Makefile.shared b/debugger/Makefile.shared
+index 528bbfe..b25abd4 100644
+--- a/debugger/Makefile.shared
++++ b/debugger/Makefile.shared
+@@ -12,13 +12,14 @@
+ 
+ include ../config/Makefile
+ 
++MY_LLP=LD_LIBRARY_PATH=/opt/trik-sdk/sysroots/armv5te-oe-linux-gnueabi/lib
+ CAMLC=../ocamlcomp.sh
+ COMPFLAGS=-warn-error A $(INCLUDES)
+ LINKFLAGS=-linkall -I $(UNIXDIR)
+-CAMLYACC=../boot/ocamlyacc
++CAMLYACC=$(MY_LLP) ../boot/ocamlyacc
+ YACCFLAGS=
+-CAMLLEX=../boot/ocamlrun ../boot/ocamllex
+-CAMLDEP=../boot/ocamlrun ../tools/ocamldep
++CAMLLEX=$(MY_LLP) ../boot/ocamlrun ../boot/ocamllex
++CAMLDEP=$(MY_LLP) ../boot/ocamlrun ../tools/ocamldep
+ DEPFLAGS=$(INCLUDES)
+ 
+ INCLUDES=\
+diff --git a/driver/ocamlcomp.sh.in b/driver/ocamlcomp.sh.in
+index fc0a8e1..55f9628 100644
+--- a/driver/ocamlcomp.sh.in
++++ b/driver/ocamlcomp.sh.in
+@@ -14,4 +14,5 @@
+ 
+ topdir=`dirname $0`
+ 
+-exec @compiler@ -nostdlib -I $topdir/stdlib "$@"
++LD_LIBRARY_PATH=/opt/trik-sdk/sysroots/armv5te-oe-linux-gnueabi/lib:$LD_LIBRARY_PATH \
++    exec @compiler@ -nostdlib -I $topdir/stdlib "$@"
+diff --git a/lex/Makefile b/lex/Makefile
+index debad6e..b0c2066 100644
+--- a/lex/Makefile
++++ b/lex/Makefile
+@@ -11,13 +11,14 @@
+ #########################################################################
+ 
+ # The lexer generator
+-CAMLC=../boot/ocamlrun ../boot/ocamlc -strict-sequence -nostdlib -I ../boot
+-CAMLOPT=../boot/ocamlrun ../ocamlopt -nostdlib -I ../stdlib
++MY_LLP=LD_LIBRARY_PATH=/opt/trik-sdk/sysroots/armv5te-oe-linux-gnueabi:/opt/trik-sdk/sysroots/armv5te-oe-linux-gnueabi/lib
++CAMLC=$(MY_LLP) ../boot/ocamlrun ../boot/ocamlc -strict-sequence -nostdlib -I ../boot
++CAMLOPT=$(MY_LLP) ../boot/ocamlrun ../ocamlopt -nostdlib -I ../stdlib
+ COMPFLAGS=-w +33..39 -warn-error A
+-CAMLYACC=../boot/ocamlyacc
++CAMLYACC=$(MY_LLP) ../boot/ocamlyacc
+ YACCFLAGS=-v
+-CAMLLEX=../boot/ocamlrun ../boot/ocamllex
+-CAMLDEP=../boot/ocamlrun ../tools/ocamldep
++CAMLLEX=$(MY_LLP) ../boot/ocamlrun ../boot/ocamllex
++CAMLDEP=$(MY_LLP) ../boot/ocamlrun ../tools/ocamldep
+ 
+ 
+ OBJS=cset.cmo syntax.cmo parser.cmo lexer.cmo table.cmo lexgen.cmo \
+diff --git a/ocamldoc/Makefile b/ocamldoc/Makefile
+index 144b95d..9efc7d5 100644
+--- a/ocamldoc/Makefile
++++ b/ocamldoc/Makefile
+@@ -14,12 +14,12 @@ include ../config/Makefile
+ 
+ # Various commands and dir
+ ##########################
+-CAMLRUN=../boot/ocamlrun
++CAMLRUN= $(MY_LLP) ../boot/ocamlrun
+ OCAMLC   = ../ocamlcomp.sh
+ OCAMLOPT = ../ocamlcompopt.sh
+ OCAMLDEP = $(CAMLRUN) ../tools/ocamldep
+ OCAMLLEX = $(CAMLRUN) ../boot/ocamllex
+-OCAMLYACC= ../boot/ocamlyacc
++OCAMLYACC= $(MY_LLP) ../boot/ocamlyacc
+ OCAMLLIB = $(LIBDIR)
+ OCAMLBIN = $(BINDIR)
+ 
+@@ -30,7 +30,7 @@ OCAMLPP=-pp './remove_DEBUG'
+ MKDIR=mkdir -p
+ CP=cp -f
+ OCAMLDOC=ocamldoc
+-OCAMLDOC_RUN=sh ./runocamldoc $(SUPPORTS_SHARED_LIBRARIES)
++OCAMLDOC_RUN=$(MY_LLP) sh ./runocamldoc $(SUPPORTS_SHARED_LIBRARIES)
+ OCAMLDOC_OPT=$(OCAMLDOC).opt
+ OCAMLDOC_LIBCMA=odoc_info.cma
+ OCAMLDOC_LIBCMI=odoc_info.cmi
+@@ -196,7 +196,7 @@ STDLIB_MLIS=../stdlib/*.mli \
+ 	../otherlibs/unix/unix.mli \
+ 	../otherlibs/str/str.mli \
+ 	../otherlibs/bigarray/bigarray.mli \
+-	../otherlibs/num/num.mli
++
+ 
+ all: exe lib generators manpages
+ 
+diff --git a/otherlibs/Makefile.shared b/otherlibs/Makefile.shared
+index 4e8092f..c1e1fd6 100644
+--- a/otherlibs/Makefile.shared
++++ b/otherlibs/Makefile.shared
+@@ -20,7 +20,8 @@ include $(ROOTDIR)/config/Makefile
+ CC=$(BYTECC)
+ CAMLRUN=$(ROOTDIR)/boot/ocamlrun
+ COMPFLAGS=-w +33..39 -warn-error A -g $(EXTRACAMLFLAGS)
+-MKLIB=$(CAMLRUN) $(ROOTDIR)/tools/ocamlmklib
++MY_LLP=LD_LIBRARY_PATH=/opt/trik-sdk/sysroots/armv5te-oe-linux-gnueabi/lib:
++MKLIB=$(MY_LLP) $(CAMLRUN) $(ROOTDIR)/tools/ocamlmklib
+ 
+ # Variables to be defined by individual libraries:
+ #LIBNAME=
+diff --git a/otherlibs/dynlink/Makefile b/otherlibs/dynlink/Makefile
+index e90aa41..e72b2fa 100644
+--- a/otherlibs/dynlink/Makefile
++++ b/otherlibs/dynlink/Makefile
+@@ -15,7 +15,7 @@
+ 
+ include ../../config/Makefile
+ 
+-CAMLC=../../boot/ocamlrun ../../ocamlc
++CAMLC=$(MY_LLP) ../../boot/ocamlrun ../../ocamlc
+ CAMLOPT=../../ocamlcompopt.sh
+ INCLUDES=-I ../../utils -I ../../typing -I ../../bytecomp -I ../../asmcomp
+ COMPFLAGS=-w +33..39 -warn-error A -I ../../stdlib $(INCLUDES)
+diff --git a/otherlibs/systhreads/Makefile b/otherlibs/systhreads/Makefile
+index d6b8686..e2326b2 100644
+--- a/otherlibs/systhreads/Makefile
++++ b/otherlibs/systhreads/Makefile
+@@ -15,7 +15,7 @@ include ../../config/Makefile
+ 
+ CAMLC=../../ocamlcomp.sh -I ../unix
+ CAMLOPT=../../ocamlcompopt.sh -I ../unix
+-MKLIB=../../boot/ocamlrun ../../tools/ocamlmklib
++MKLIB=$(MY_LLP) ../../boot/ocamlrun ../../tools/ocamlmklib
+ COMPFLAGS=-w +33..39 -warn-error A -g
+ 
+ BYTECODE_C_OBJS=st_stubs_b.o
+diff --git a/otherlibs/threads/Makefile b/otherlibs/threads/Makefile
+index 311373b..a359d23 100644
+--- a/otherlibs/threads/Makefile
++++ b/otherlibs/threads/Makefile
+@@ -16,7 +16,7 @@ include ../../config/Makefile
+ CC=$(BYTECC)
+ CFLAGS=-I../../byterun -O $(BYTECCCOMPOPTS) $(SHAREDCCCOMPOPTS) -g
+ CAMLC=../../ocamlcomp.sh -I ../unix
+-MKLIB=../../boot/ocamlrun ../../tools/ocamlmklib
++MKLIB=$(MY_LLP) ../../boot/ocamlrun ../../tools/ocamlmklib
+ COMPFLAGS=-w +33..39 -warn-error A
+ 
+ C_OBJS=scheduler.o
+diff --git a/stdlib/Makefile.shared b/stdlib/Makefile.shared
+index e9d5940..e16de53 100755
+--- a/stdlib/Makefile.shared
++++ b/stdlib/Makefile.shared
+@@ -12,7 +12,8 @@
+ #########################################################################
+ 
+ include ../config/Makefile
+-RUNTIME=../boot/ocamlrun
++MY_LLP=LD_LIBRARY_PATH=/opt/trik-sdk/sysroots/armv5te-oe-linux-gnueabi/lib
++RUNTIME=$(MY_LLP)  ../boot/ocamlrun
+ COMPILER=../ocamlc
+ CAMLC=$(RUNTIME) $(COMPILER)
+ COMPFLAGS=-strict-sequence -w +33..39 -g -warn-error A -nostdlib
+diff --git a/tools/Makefile.shared b/tools/Makefile.shared
+index 117f576..d35f948 100644
+--- a/tools/Makefile.shared
++++ b/tools/Makefile.shared
+@@ -12,7 +12,8 @@
+ 
+ include ../config/Makefile
+ 
+-CAMLRUN=../boot/ocamlrun
++MY_LLP=LD_LIBRARY_PATH=/opt/trik-sdk/sysroots/armv5te-oe-linux-gnueabi/lib
++CAMLRUN=$(MY_LLP) ../boot/ocamlrun
+ CAMLC=$(CAMLRUN) ../boot/ocamlc -strict-sequence -nostdlib -I ../boot
+ CAMLOPT=$(CAMLRUN) ../ocamlopt -nostdlib -I ../stdlib
+ CAMLLEX=$(CAMLRUN) ../boot/ocamllex
+diff --git a/yacc/Makefile b/yacc/Makefile
+index f5b37e0..f2c4a1c 100644
+--- a/yacc/Makefile
++++ b/yacc/Makefile
+@@ -23,7 +23,7 @@ OBJS= closure.o error.o lalr.o lr0.o main.o mkpar.o output.o reader.o \
+ all: ocamlyacc$(EXE)
+ 
+ ocamlyacc$(EXE): $(OBJS)
+-	$(CC) $(CFLAGS) $(CCLINKFLAGS) -o ocamlyacc$(EXE) $(OBJS)
++	$(CC) $(CFLAGS) $(BYTECCLIBS) -o ocamlyacc$(EXE) $(OBJS)
+ 
+ version.h : ../VERSION
+ 	echo "#define OCAML_VERSION \"`sed -e 1q ../VERSION`\"" >version.h
