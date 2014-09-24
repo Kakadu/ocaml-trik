@@ -111,6 +111,17 @@ extern "C" value caml_brick_sensor_value(value _brick, value _port) {
     }
 }
 
+// Brick.t -> int -> bool
+extern "C" value caml_brick_keys_was_pressed(value _brick, value _keyCode) {
+    CAMLparam2(_brick, _keyCode);
+
+    fromt(Brick, brick);
+    int keyCode = Int_val(_keyCode);
+    bool ans = brick->keys()->wasPressed(keyCode);
+
+    CAMLreturn(Val_bool(ans));
+}
+
 // external create: QApplication.t -> string -> string -> Brick.t
 extern "C" value caml_create_display(value _brick) {
     CAMLparam1(_brick);

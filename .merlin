@@ -1,1 +1,4 @@
-PKG threads
+PKG threads.vm
+FLG -vmthread
+SRC .
+B .
