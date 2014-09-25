@@ -10,17 +10,32 @@ OCAMLC_TARGET_OPTS=-custom -cc "g++" \
 	-ccopt -L$(THREADS_DIR)  $(THREADS_DIR)/threads.cma \
 	-cclib -lstdc++ -verbose
 
-QTMODULES ?= QtGui
+ifeq ($(WITH),QT4)
+QTMODULES ?= QtCore
+OCAML_CXXFLAGS += -ccopt -DWITHQT4
+endif
+
+ifeq ($(WITH),QT5)
+QTMODULES ?=  Qt5Core
+OCAML_CXXFLAGS += -ccopt -DWITHQT5
+endif
+
+ifeq ($(WITH),GTK)
+QTMODULES ?= gtk+-2.0
+OCAML_CXXFLAGS += -ccopt -DWITHGTK
+endif
+$(warning $(QTMODULES) $(WITH) )
+
 OCAMLC_CLINK_OPTS += $(addprefix -cclib ,$(shell pkg-config --libs $(QTMODULES) ) )
 OCAMLC_CLINK_OPTS += -cclib -lstdc++
 
-OCAML_CXXFLAGS =  $(addprefix -ccopt , $(CXXFLAGS) )
+OCAML_CXXFLAGS +=  $(addprefix -ccopt , $(CXXFLAGS) )
 OCAML_CXXFLAGS += $(addprefix -ccopt , $(shell pkg-config --cflags $(QTMODULES) ) )
 OCAML_CXXFLAGS += -ccopt -I$(OCAML_HEADERS_DIR) -ccopt -I$(OCAMLWHERE)/threads/ #-ccopt -save-temps
 OCAML_CXXFLAGS += -ccopt -fPIC
 
 
-all: hello.byte
+all: hello.byte hello.native
 
 wrap.o: wrap.c
 	$(OCAMLC) -cc "$(CXX)" $(OCAML_CXXFLAGS) -c $< -o $@
