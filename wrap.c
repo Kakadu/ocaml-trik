@@ -14,7 +14,7 @@ extern "C" {
 
 using namespace trikControl;
 
-#define fromt(typ, cval)     typ *cval = (typ*) (Field(_##cval,0));
+#define fromt(typ, cval)     typ *cval = (typ*) (Field(_##cval,0)); Q_ASSERT(cval != NULL);
 #define maket(typ, cval) \
     _##cval = caml_alloc_small(1, Abstract_tag); \
     (*((typ **) &Field(_##cval, 0))) = cval;
@@ -460,12 +460,83 @@ extern "C" value caml_brick_display(value _brick) {
     CAMLreturn(_display);
 }
 ////////////// Display
-extern "C" value caml_display_smile(value _display) {
-    CAMLparam1(_display);
+// showImage: Display.t -> string -> unit
+extern "C" value caml_display_showImage(value _display, value _path) {
+    CAMLparam2(_display,_path);
     fromt(Display, display);
-    display->smile();
+    display->showImage(QString_val(_path) );
     CAMLreturn(Val_unit);
 }
+// addLabel: Display.t -> string -> x:int -> y:int -> unit
+extern "C" value caml_display_addLabel(value _display, value _text, value _x, value _y) {
+    CAMLparam4(_display,_text,_x,_y);
+    fromt(Display, display);
+    display->addLabel(QString_val(_text), Int_val(_x), Int_val(_y) );
+    CAMLreturn(Val_unit);
+}
+declareProc(Display,display,removeLabels)
+// smile: Display.t -> unit
+declareProc(Display,display,smile)
+// sadSmile: Display.t -> unit
+declareProc(Display,display,sadSmile)
+// hide: Display.t -> unit
+declareProc(Display,display,hide)
+// clear: Display.t -> unit
+declareProc(Display,display,clear)
+
+// setPainterColor: Display.t -> string -> unit
+extern "C" value caml_display_setPainterColor(value _display, value _colorstr) {
+    CAMLparam2(_display,_colorstr);
+    fromt(Display,display);
+    display->setPainterColor(QString_val(_colorstr) );
+    CAMLreturn(Val_unit);
+}
+// setBackground: Display.t -> string -> unit
+extern "C" value caml_display_setBackground(value _display, value _colorstr) {
+    CAMLparam2(_display,_colorstr);
+    fromt(Display,display);
+    display->setBackground(QString_val(_colorstr) );
+    CAMLreturn(Val_unit);
+}
+
+// setPainterWidth: Display.t -> int -> unit
+extern "C" value caml_display_setPainterWidth(value _display, value _w) {
+    CAMLparam2(_display,_w);
+    fromt(Display,display);
+    display->setPainterWidth(Int_val(_w) );
+    CAMLreturn(Val_unit);
+}
+// drawLine: Display.t -> x1:int -> y1:int -> x2:int -> y2:int -> unit
+extern "C" value caml_display_drawLine(value _display, value _x1, value _y1, value _x2, value _y2) {
+    CAMLparam5(_display,_x1,_y1,_x2,_y2);
+    fromt(Display,display);
+    display->drawLine(Int_val(_x1), Int_val(_y1), Int_val(_x2), Int_val(_y2) );
+    CAMLreturn(Val_unit);
+}
+//
+extern "C" value caml_display_drawPoint(value _display, value _x1, value _y1) {
+    CAMLparam3(_display,_x1,_y1);
+    fromt(Display,display);
+    display->drawPoint(Int_val(_x1), Int_val(_y1) );
+    CAMLreturn(Val_unit);
+}
+// drawRect: Display.t -> x1:int -> y1:int -> w:int -> h:int -> unit
+extern "C" value caml_display_drawRect(value _display, value _x1, value _y1, value _w, value _h) {
+    CAMLparam5(_display,_x1,_y1,_w,_h);
+    fromt(Display,display);
+    display->drawRect(Int_val(_x1), Int_val(_y1), Int_val(_w), Int_val(_h) );
+    CAMLreturn(Val_unit);
+}
+// drawEllipse: Display.t -> x1:int -> y1:int -> w:int -> h:int -> unit
+extern "C" value caml_display_drawEllipse(value _display, value _x1, value _y1, value _w, value _h) {
+    CAMLparam5(_display,_x1,_y1,_w,_h);
+    fromt(Display,display);
+    display->drawEllipse(Int_val(_x1), Int_val(_y1), Int_val(_w), Int_val(_h) );
+    CAMLreturn(Val_unit);
+}
+// drawArc is postponed because it requires two functions
+// drawArc: Display.t -> x1:int -> y1:int -> w:int -> h:int -> start:int -> span:int -> unit
+
 ////////////// Display end
 
 // get_LED: Brick.t -> LED.t

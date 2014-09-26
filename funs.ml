@@ -3,11 +3,11 @@ module QApplication = struct
   external create : string array -> t = "caml_create_qapp"
   external exec   : t -> int  = "caml_qapp_exec"
 end
-
+(*
 module Sensor = struct
   type t = string
 end
-
+ *)
 module Motor = struct
   type t
   external power: t -> int = "caml_motor_getPower"
@@ -57,7 +57,20 @@ end
 module Display = struct
   type t
   (*external make : Brick.t -> t = "caml_create_display"*)
+  external showImage: t -> string -> unit = "caml_display_showImage"
+  external addLabel: t -> text:string -> x:int -> y:int -> unit = "caml_display_addLabel"
   external smile : t -> unit   = "caml_display_smile"
+  external sadSmile : t -> unit   = "caml_display_sadSmile"
+  external hide : t -> unit   = "caml_display_hide"
+  external clear : t -> unit   = "caml_display_clear"
+  external setPainerColor: t -> string -> unit = "caml_display_setPainterColor"
+  external setBackground: t -> string -> unit = "caml_display_setBackground"
+  external setPainterWidth: t -> int -> unit = "caml_display_setPainterWidth"
+  external drawLine:t -> x1:int -> y1:int -> x2:int -> y2:int -> unit = "caml_display_drawLine"
+  external drawPoint: t -> x:int -> y:int -> unit = "caml_display_drawPoint"
+  external drawRect:t -> x1:int -> y1:int -> w:int -> h:int -> unit = "caml_display_drawRect"
+  external drawEllipse: t -> x1:int -> y1:int -> w:int -> h:int -> unit = "caml_display_drawEllipse"
+
 end
 
 module Led = struct

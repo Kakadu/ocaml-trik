@@ -56,7 +56,7 @@ let () =
       Thread.delay 1.
   done
   in
-  let find_wall (rangeSensor: Sensor.t) =
+  let find_wall rangeSensor =
     while true do
       match Brick.sensor_value brick rangeSensor with
       | Some x when x<50 ->
