@@ -35,7 +35,7 @@ let () =
   let current_power = ref 10 in
 
   let set_engine_power newval =
-    List.iter (fun s -> Brick.set_motor_power brick s newval) config.engineSensors
+    List.iter (fun s -> Motor.set_power (Brick.motor brick s) newval) config.engineSensors
   in
   let incr_engine_power () =
     current_power := !current_power + 10;
@@ -60,7 +60,7 @@ let () =
     while true do
       match Brick.sensor_value brick rangeSensor with
       | Some x when x<50 ->
-         List.iter (fun motor -> Brick.set_motor_power brick motor 10) config.engineSensors;
+         List.iter (fun motor -> Motor.set_power (Brick.motor brick motor) 10) config.engineSensors;
       | Some x           ->
          printf "Wall is found: range %d\n%!" x;
          set_engine_power 0;
@@ -77,7 +77,7 @@ let () =
     ]
   in
 
-  at_exit (fun () -> List.iter (fun s -> Brick.set_motor_power brick s 0) config.engineSensors);
+  at_exit (fun () -> List.iter (fun s -> Motor.set_power (Brick.motor brick s) 0) config.engineSensors);
 
   QApplication.exec app |> ignore
 

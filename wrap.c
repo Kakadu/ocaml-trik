@@ -146,20 +146,18 @@ extern "C" value caml_brick_motor(value _brick, value _m) {
     CAMLlocal1(_motor);
     fromt(Brick, brick);
     Motor *motor = brick->motor(QString_val(_m));
-    _motor = caml_alloc_small(1, Abstract_tag);
-    (*((Motor **) &Field(_motor, 0))) = motor;
-
+    maket(Motor,motor);
     CAMLreturn(_motor);
 }
 // power: Motor.t -> int
-extern "C" value caml_motor_getpower(value _motor) {
+extern "C" value caml_motor_getPower(value _motor) {
     CAMLparam1(_motor);
     fromt(Motor, motor);
     CAMLreturn(Val_int(motor->power()));
 }
 
 // poweroff: Motor.t -> unit
-extern "C" value caml_motor_poweroff(value _motor) {
+extern "C" value caml_motor_powerOff(value _motor) {
     CAMLparam1(_motor);
     fromt(Motor, motor);
     motor->powerOff();
@@ -167,13 +165,13 @@ extern "C" value caml_motor_poweroff(value _motor) {
 }
 
 // setpower: Motor.t -> unit
-extern "C" value caml_motor_setpower(value _motor, value _newval) {
+extern "C" value caml_motor_setPower(value _motor, value _newval) {
     CAMLparam1(_motor);
     fromt(Motor, motor);
     motor->setPower(Int_val(_newval));
     CAMLreturn(Val_unit);
 }
-
+/*
 // go_forward: Brick.t -> Motor.t -> unit
 extern "C" value caml_brick_set_motor_power(value _brick, value _m, value _power) {
     CAMLparam3(_brick, _m, _power);
@@ -183,7 +181,7 @@ extern "C" value caml_brick_set_motor_power(value _brick, value _m, value _power
     m->setPower(Int_val(_power));
     CAMLreturn(Val_unit);
 }
-
+*/
 /////////////// PwmCapture is ignored
 
 /////////////// Sensor class has only 1 method so we will not invent new type
@@ -249,6 +247,7 @@ extern "C" value caml_brick_lineSensor(value _brick) {
     CAMLreturn(_lineSensor);
 }
 
+/////////////// LineSensor
 // init: LineSensor.t -> bool -> unit
 extern "C" value caml_lineSensor_init(value _lineSensor, value _show) {
     CAMLparam2(_lineSensor, _show);
@@ -421,7 +420,7 @@ extern "C" value caml_brick_keys_reset(value _brick) {
 
 
 // get_gamepad: Brick.t -> GamePad.t
-extern "C" value caml_brick_gamePad(value _brick) {
+extern "C" value caml_brick_gamepad(value _brick) {
     CAMLparam1(_brick);
     CAMLlocal1(_pad);
     fromt(Brick, brick);
@@ -451,7 +450,7 @@ extern "C" value caml_brick_wait(value _brick, value _ms) {
 
 
 // display: Brick.t -> Display.t
-extern "C" value caml_create_display(value _brick) {
+extern "C" value caml_brick_display(value _brick) {
     CAMLparam1(_brick);
     CAMLlocal1(_display);
     fromt(Brick, brick);
