@@ -1,6 +1,3 @@
-
-external send_an_int: int -> unit = "get_an_int"
-
 module QApplication = struct
   type t
   external create : string array -> t = "caml_create_qapp"
@@ -17,7 +14,6 @@ end
 
 
 module Brick = struct
-  type t
   module Keys = struct
     type t = int
     let left : t = 105
@@ -29,8 +25,13 @@ module Brick = struct
     let menu  : t = 139
     let int_of_key k : int = k
   end
+
+  type t
   external create : QApplication.t -> string -> string -> t = "caml_create_brick"
-  external say : t-> string -> unit = "caml_brick_say"
+  external reset  : t -> unit = "caml_brick_reset"
+  external isEventDriven  : t -> unit = "caml_brick_isEventDriven"
+  external playSound : t -> string -> unit = "caml_brick_playSound"
+  external say : t -> string -> unit = "caml_brick_say"
   external sensor_value: t -> string -> int option = "caml_brick_sensor_value"
   external set_motor_power: t -> Motor.t -> int -> unit = "caml_brick_set_motor_power"
 
