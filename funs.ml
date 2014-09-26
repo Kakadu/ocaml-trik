@@ -52,6 +52,10 @@ end
 module Gamepad = struct
   type t
   external reset: t -> unit = "caml_gamepad_reset"
+  external buttonWasPressed: t -> int -> bool = "caml_gamepad_buttonWasPressed"
+  external gamepadIsPressed: t -> int -> bool = "caml_gamepad_isPadPressed"
+  external padX: t -> int -> int = "caml_gamepad_padX"
+  external padY: t -> int -> int = "caml_gamepad_padY"
 end
 
 module Display = struct

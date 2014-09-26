@@ -432,10 +432,33 @@ extern "C" value caml_brick_gamepad(value _brick) {
 // reset: GamePad.t -> unit
 declareReset(Gamepad,gamepad)
 // buttonWasPressed: GamePad.t -> int -> bool
+extern "C" value caml_gamepad_buttonWasPressed(value _pad, value _code) {
+    CAMLparam2(_pad,_code);
+    fromt(Gamepad,pad);
+    bool ans = pad->buttonWasPressed(Int_val(_code));
+    CAMLreturn(Bool_val(ans));
+}
 // isPadPressed: GamePad.t -> int -> bool
+extern "C" value caml_gamepad_isPadPressed(value _pad, value _code) {
+    CAMLparam2(_pad,_code);
+    fromt(Gamepad,pad);
+    bool ans = pad->isPadPressed(Int_val(_code));
+    CAMLreturn(Bool_val(ans));
+}
 // padX: GamePad.t -> int -> int
+extern "C" value caml_gamepad_padX(value _pad, value _code) {
+    CAMLparam2(_pad,_code);
+    fromt(Gamepad,pad);
+    int ans = pad->padX(Int_val(_code));
+    CAMLreturn(Int_val(ans));
+}
 // padY: GamePad.t -> int -> int
-// THIS IS TODO
+extern "C" value caml_gamepad_padY(value _pad, value _code) {
+    CAMLparam2(_pad,_code);
+    fromt(Gamepad,pad);
+    int ans = pad->padY(Int_val(_code));
+    CAMLreturn(Int_val(ans));
+}
 /////////////////// GamePad end
 
 // wait: Brick.t -> int -> unit
