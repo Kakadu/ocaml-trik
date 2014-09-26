@@ -227,9 +227,7 @@ extern "C" value caml_brick_gyroscope_value(value _brick) {
 
     _ans = caml_alloc(3, 0);
 #define F(n) Store_field( _ans, n, Val_int(vals.at(n)) );
-    F(0);
-    F(1);
-    F(2);
+    F(0);    F(1);    F(2);
 
     CAMLreturn(_ans);
 }
@@ -241,8 +239,7 @@ extern "C" value caml_brick_lineSensor(value _brick) {
     fromt(Brick, brick);
 
     LineSensor *lineSensor = brick->lineSensor();
-    _lineSensor = caml_alloc_small(1, Abstract_tag);
-    (*((LineSensor **) &Field(_lineSensor, 0))) = lineSensor;
+    maket(LineSensor,lineSensor);
 
     CAMLreturn(_lineSensor);
 }
