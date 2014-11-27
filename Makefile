@@ -58,8 +58,9 @@ hello.tar.xz: hello.native
 	#cp hello.byte ~/h
 
 clean:
-	rm -fr *.o *.cm[ioax] hello.byte
+	rm -fr *.o *.cm[ioax] hello.byte hello.native
 
 hello.cmo: funs.cmo
 
 .PHONY: all clean
+
