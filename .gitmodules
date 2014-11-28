@@ -1,0 +1,3 @@
+[submodule "trikRuntime"]
+	path = trikRuntime
+	url = https://github.com/trikset/trikRuntime
