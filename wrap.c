@@ -1,10 +1,10 @@
 #include <stdio.h>
 
 extern "C" {
-#include <mlvalues.h>
-#include <threads.h>
-#include <memory.h>
-#include <alloc.h>
+#include <caml/mlvalues.h>
+#include <caml/threads.h>
+#include <caml/memory.h>
+#include <caml/alloc.h>
 }
 
 
@@ -495,10 +495,6 @@ extern "C" value caml_display_addLabel(value _display, value _text, value _x, va
     CAMLreturn(Val_unit);
 }
 declareProc(Display,display,removeLabels)
-// smile: Display.t -> unit
-declareProc(Display,display,smile)
-// sadSmile: Display.t -> unit
-declareProc(Display,display,sadSmile)
 // hide: Display.t -> unit
 declareProc(Display,display,hide)
 // clear: Display.t -> unit

@@ -6,6 +6,5 @@
 *.ii
 # symlinks to trik runtime
 /libs
-/trikRuntime
 makeenv
 
