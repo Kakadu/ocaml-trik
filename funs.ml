@@ -63,8 +63,10 @@ module Display = struct
   (*external make : Brick.t -> t = "caml_create_display"*)
   external showImage: t -> string -> unit = "caml_display_showImage"
   external addLabel: t -> text:string -> x:int -> y:int -> unit = "caml_display_addLabel"
+(*
   external smile : t -> unit   = "caml_display_smile"
   external sadSmile : t -> unit   = "caml_display_sadSmile"
+ *)
   external hide : t -> unit   = "caml_display_hide"
   external clear : t -> unit   = "caml_display_clear"
   external setPainerColor: t -> string -> unit = "caml_display_setPainterColor"
@@ -127,6 +129,3 @@ module Brick = struct
   external run: t ->  unit = "caml_brick_run"
   external quit: t -> unit = "caml_brick_quit"
 end
-
-
-

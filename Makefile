@@ -36,7 +36,7 @@ OCAMLC_TARGET_OPTS += $(addprefix -cclib ,$(shell pkg-config --libs $(QTMODULES)
 
 OCAMLC_TARGET_OPTS += -ccopt -Llibs -cclib -ltrikControl
 OCAMLOPT_TARGET_OPTS += $(addprefix -cclib ,$(shell pkg-config --libs $(QTMODULES) ) )
-OCAMLOPT_TARGET_OPTS += -ccopt -LtrikRuntime/bin/arm-release -cclib -ltrikControl
+OCAMLOPT_TARGET_OPTS += -ccopt -LtrikRuntime/bin/arm-release -cclib -lqslog -cclib -ltrikKernel -cclib -ltrikControl -cclib -lpthread -cclib -lstdc++
 
 OCAML_CXXFLAGS =  $(addprefix -ccopt , $(CXXFLAGS) )
 OCAML_CXXFLAGS += $(addprefix -ccopt , $(shell pkg-config --cflags QtGuiE) )
@@ -45,12 +45,12 @@ OCAML_CXXFLAGS += #-ccopt -I$(OCAML_HEADERS_DIR) -ccopt -I$(OCAMLWHERE)/threads/
 
 wrap.o: wrap.c
 	$(OCAMLOPT) -cc "$(CXX)" $(OCAML_CXXFLAGS) \
-	-ccopt -ItrikRuntime/trikControl/include/ -ccopt -I$(OCAML_HEADERS_DIR) -c $< -o $@
+	-ccopt -ItrikRuntime/trikControl/include/ -c $< -o $@
 	#file  $@
 	#$(NM) $@
 
-funs.cmo: funs.ml
-	$(OCAMLC) -c $< -o $@
+#funs.cmo: funs.ml
+#	$(OCAMLC) -c $< -o $@
 
 funs.cmx: funs.ml
 	$(OCAMLOPT) -c $< -o $@
@@ -74,6 +74,9 @@ hello.tar.xz: hello.native
 clean:
 	$(RM) -r *.o *.cm[ioax] hello.byte hello.native *.ii *.s
 
+# depends
 hello.cmo: funs.cmo
+hello.cmx: funs.cmx
+
 
 .PHONY: all clean
