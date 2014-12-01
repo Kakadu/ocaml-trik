@@ -136,9 +136,8 @@ module type MAILBOX = sig
 end
 
 module MailBox : MAILBOX = struct
-  type mailbox_t
-  type t = mailbox_t
-  external create' : Brick.t -> 'a -> mailbox_t = ""
+  type t  (* type for mailbox, not wrapper *)
+  external create' : Brick.t -> 'a -> mailbox_t = "caml_create_mailbox"
   let create (brick: Brick.t) handler =
     let o = object
         method onreceive s = handler s
@@ -146,4 +145,5 @@ module MailBox : MAILBOX = struct
     in
     create' brick o
 
+  external connect: t -> ip:string -> unit = "caml_mailbox_connect"
 end
