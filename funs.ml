@@ -129,3 +129,21 @@ module Brick = struct
   external run: t ->  unit = "caml_brick_run"
   external quit: t -> unit = "caml_brick_quit"
 end
+
+module type MAILBOX = sig
+  type t
+  val create: Brick.t -> (string -> unit) -> t
+end
+
+module MailBox : MAILBOX = struct
+  type mailbox_t
+  type t = mailbox_t
+  external create' : Brick.t -> 'a -> mailbox_t = ""
+  let create (brick: Brick.t) handler =
+    let o = object
+        method onreceive s = handler s
+    end
+    in
+    create' brick o
+
+end

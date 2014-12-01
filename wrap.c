@@ -1,16 +1,4 @@
-#include <stdio.h>
-
-extern "C" {
-#include <caml/mlvalues.h>
-#include <caml/threads.h>
-#include <caml/memory.h>
-#include <caml/alloc.h>
-}
-
-
-#include <trikControl/brick.h>
-#include <QtCore/QDebug>
-#include <QtGui/QApplication>
+#include "mlheaders.h"
 
 using namespace trikControl;
 

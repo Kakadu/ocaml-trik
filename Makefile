@@ -30,7 +30,7 @@ CXXFLAGS=-std=c++11 -ItrikRuntime/trikControl/include -I$(shell $(OCAMLOPT) -whe
 #OCAMLOPT_TARGET_OPTS= -cc "$(CC)" \
 	-ccopt -L$(SYSTHREADS_DIR) unix.cmxa  $(SYSTHREADS_DIR)/threads.cmxa \
 	-cclib -lstdc++
-QTMODULES=QtGuiE
+QTMODULES=QtGuiE QtNetworkE
 OCAMLC_TARGET_OPTS += $(addprefix -cclib ,$(shell pkg-config --libs $(QTMODULES) ) )
 #$(warning $(OCAMLC_TARGET_OPTS) )
 
@@ -42,12 +42,13 @@ OCAML_CXXFLAGS =  $(addprefix -ccopt , $(CXXFLAGS) )
 OCAML_CXXFLAGS += $(addprefix -ccopt , $(shell pkg-config --cflags QtGuiE) )
 OCAML_CXXFLAGS += #-ccopt -I$(OCAML_HEADERS_DIR) -ccopt -I$(OCAMLWHERE)/threads/ -ccopt -save-temps
 
-
+wrap.o: mlheaders.h
 wrap.o: wrap.c
-	$(OCAMLOPT) -cc "$(CXX)" $(OCAML_CXXFLAGS) \
-	-ccopt -ItrikRuntime/trikControl/include/ -c $< -o $@
-	#file  $@
-	#$(NM) $@
+	$(OCAMLOPT) -cc "$(CXX)" $(OCAML_CXXFLAGS) -ccopt -ItrikRuntime/trikControl/include/ -c $< -o $@
+
+mailbox.o: mlheaders.h
+mailbox.o: mailbox.c
+	$(OCAMLOPT) -cc "$(CXX)" $(OCAML_CXXFLAGS) -ccopt -ItrikRuntime/trikControl/include/ -c $< -o $@
 
 #funs.cmo: funs.ml
 #	$(OCAMLC) -c $< -o $@
@@ -64,7 +65,7 @@ hello.cmx: hello.ml
 #hello.byte: wrap.o funs.cmo hello.cmo
 #	$(OCAMLC) $(OCAMLC_TARGET_OPTS) $^ -o $@
 
-hello.native: wrap.o funs.cmx hello.cmx
+hello.native: wrap.o mailbox.o funs.cmx hello.cmx
 	$(OCAMLOPT) -linkpkg $(OCAMLOPT_TARGET_OPTS) $^ -o $@
 
 hello.tar.xz: hello.native
