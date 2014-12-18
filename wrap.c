@@ -2,7 +2,7 @@
 
 using namespace trikControl;
 
-static value Val_some(value v) {
+value Val_some(value v) {
     CAMLparam1( v );
     CAMLlocal1( some );
     some = caml_alloc(1, 0);
@@ -46,20 +46,6 @@ extern "C" value caml_qapp_exec(value _app) {
     app->exec();
     caml_leave_blocking_section();
     CAMLreturn(Val_int(0) );
-}
-// external create: QApplication.t -> string -> string -> Brick.t
-extern "C" value caml_create_brick(value _qapp, value _config, value _start) {
-    CAMLparam3(_qapp, _config, _start);
-    CAMLlocal1(_brick);
-
-    QApplication *app = (QApplication*) (Field(_qapp,0));
-    QThread *guiThread = app->thread();
-    Brick *brick = new Brick(*guiThread,
-                             QString::fromLocal8Bit(String_val(_config)),
-                             QString::fromLocal8Bit(String_val(_start))  );
-    _brick = caml_alloc_small(1, Abstract_tag);
-    (*((Brick **) &Field(_brick, 0))) = brick;
-    CAMLreturn(_brick);
 }
 
 // reset: Brick.t -> unit
@@ -142,20 +128,6 @@ extern "C" value caml_brick_set_motor_power(value _brick, value _m, value _power
 }
 */
 /////////////// PwmCapture is ignored
-
-/////////////// Sensor class has only 1 method so we will not invent new type
-// sensor: Brick.t -> string -> int option
-extern "C" value caml_brick_sensor_value(value _brick, value _port) {
-    CAMLparam2(_brick,_port);
-    fromt(Brick, brick);
-    Sensor *s = brick->sensor(QString::fromLocal8Bit(String_val(_port)) );
-    if (s==NULL) {
-        CAMLreturn(Val_none);
-    } else {
-        int r = s->read();
-        CAMLreturn(Val_some(Val_int(r)));
-    }
-}
 
 //////////////// We do not invent new type for accelerometer
 // accelerometer: Brick.t -> Point3D.t (as tuple int*int*int)

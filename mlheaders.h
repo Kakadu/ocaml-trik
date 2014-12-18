@@ -10,8 +10,6 @@ extern "C" {
 #include <caml/callback.h>
 }
 
-
-#include <trikControl/brick.h>
 #include <QtCore/QDebug>
 #include <QtGui/QApplication>
 
@@ -45,3 +43,7 @@ extern "C" {
 #define Val_QString(s)   caml_copy_string(s.toLocal8Bit())
 #define QString_val(x) QString::fromLocal8Bit(String_val(x))
 #define Val_none Val_int(0)
+
+value Val_some(value);
+
+#include <trikControl/brick.h>

@@ -7,11 +7,15 @@ include makeenv
 all:
 	$(MAKE) hello.tar.xz
 
+.PHONY: trikRuntime
+trikRuntime:
+	cd trikRuntime && qmake -r && $(MAKE)
+
 #$(warning ${PKG_CONFIG_PATH})
 #$(warning ${PATH})
 
 #OCAMLC=ocamlfind   -toolchain trik c   -package threads
-OCAMLOPT=ocamlfind -toolchain trik opt -package threads -thread
+OCAMLOPT=ocamlfind -toolchain trik opt -package threads,react -thread
 
 #OCAMLWHERE=$(shell $(MY_LLP) $(OCAMLDIST)/bin/ocamlc -where)
 #OCAMLC_TARGET=$(MY_LLP) $(OCAMLDIST)/bin/ocamlc
@@ -42,6 +46,10 @@ OCAML_CXXFLAGS =  $(addprefix -ccopt , $(CXXFLAGS) )
 OCAML_CXXFLAGS += $(addprefix -ccopt , $(shell pkg-config --cflags QtGuiE) )
 OCAML_CXXFLAGS += #-ccopt -I$(OCAML_HEADERS_DIR) -ccopt -I$(OCAMLWHERE)/threads/ -ccopt -save-temps
 
+brick.o: mlheaders.h
+brick.o: brick.c
+	$(OCAMLOPT) -cc "$(CXX)" $(OCAML_CXXFLAGS) -ccopt -ItrikRuntime/trikControl/include/ -c $< -o $@
+
 wrap.o: mlheaders.h
 wrap.o: wrap.c
 	$(OCAMLOPT) -cc "$(CXX)" $(OCAML_CXXFLAGS) -ccopt -ItrikRuntime/trikControl/include/ -c $< -o $@
@@ -65,7 +73,7 @@ hello.cmx: hello.ml
 #hello.byte: wrap.o funs.cmo hello.cmo
 #	$(OCAMLC) $(OCAMLC_TARGET_OPTS) $^ -o $@
 
-hello.native: wrap.o mailbox.o funs.cmx hello.cmx
+hello.native: brick.o wrap.o mailbox.o funs.cmx hello.cmx
 	$(OCAMLOPT) -linkpkg $(OCAMLOPT_TARGET_OPTS) $^ -o $@
 
 hello.tar.xz: hello.native

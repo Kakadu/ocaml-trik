@@ -1,3 +1,5 @@
+open Printf
+
 module QApplication = struct
   type t
   external create : string array -> t = "caml_create_qapp"
@@ -110,6 +112,17 @@ module Brick = struct
   external motor: t -> string -> Motor.t = "caml_brick_motor"
   (*external set_motor_power: t -> Motor.t -> int -> unit = "caml_brick_set_motor_power"*)
   external sensor_value: t -> string -> int option = "caml_brick_sensor_value"
+  let sensor_value_exn brick port =
+    match sensor_value brick port with
+    | Some x -> x
+    | None -> failwith @@ sprintf "Can't get sonsor value on port '%s'" port
+
+  external sensor_rawvalue: t -> string -> int option = "caml_brick_sensor_rawvalue"
+  let sensor_rawvalue_exn brick port =
+    match sensor_rawvalue brick port with
+    | Some x -> x
+    | None -> failwith @@ sprintf "Can't get sonsor raw value on port '%s'" port
+
   external acc_value: t -> point3d = "caml_brick_accelerometer_value"
   external gyro_value: t -> point3d = "caml_brick_gyroscope_value"
   external lineSensor: t -> LineSensor.t = "caml_brick_lineSensor"
@@ -146,4 +159,26 @@ module MailBox : MAILBOX = struct
     create' brick o
 
   external connect: t -> ip:string -> unit = "caml_mailbox_connect"
+  external send: t -> msg:string -> unit = "caml_mailbox_send"
+
+end
+
+module TR = struct
+  external has_sensor' : Brick.t -> string -> bool = "caml_brick_has_sensor"
+  external wrap_sensor': Brick.t -> string -> < .. > -> bool = "caml_wrap_sensor"
+  exception SubscribeError of string
+
+  let wrap_sensor brick port =
+    if not (has_sensor' brick port) then raise (SubscribeError (sprintf "Port '%s' not found" port));
+    let initData = (Brick.sensor_value_exn brick port, Brick.sensor_rawvalue_exn brick port) in
+    let signal, send_data = React.S.create initData in
+
+    let obj = object
+        method onNewData data rawData =
+          printf "onNewData\n%!";
+          send_data (data, rawData)
+    end in
+    if wrap_sensor' brick port obj then signal
+    else raise (SubscribeError (sprintf "Function 'wrap_sensor' failed"))
+
 end
