@@ -1,8 +1,8 @@
 #MY_LLP=LD_LIBRARY_PATH=/opt/trik-sdk/sysroots/armv5te-oe-linux-gnueabi/lib
 
 SOURCE_OE=`opam config var prefix`/trik-sdk-linux/environment-setup-armv5te-oe-linux-gnueabi
-IGNORE := $(shell bash -c "source $(SOURCE_OE); env | sed 's/=/:=/' | sed 's/^/export /' > makeenv")
-include makeenv
+IGNORE := $(shell bash -c "source $(SOURCE_OE); env | sed 's/=/:=/' | sed 's/^/export /' > trikenv")
+include trikenv
 
 all:
 	$(MAKE) hello.tar.xz
@@ -15,7 +15,7 @@ trikRuntime:
 #$(warning ${PATH})
 
 #OCAMLC=ocamlfind   -toolchain trik c   -package threads
-OCAMLOPT=ocamlfind -toolchain trik opt -package threads,react -thread
+OCAMLOPT=ocamlfind -toolchain trik opt -package threads,react -thread #-verbose
 
 #OCAMLWHERE=$(shell $(MY_LLP) $(OCAMLDIST)/bin/ocamlc -where)
 #OCAMLC_TARGET=$(MY_LLP) $(OCAMLDIST)/bin/ocamlc
@@ -67,6 +67,9 @@ funs.cmx: funs.ml
 #hello.cmo: hello.ml
 #	$(OCAMLC) -c -vmthread $< -o $@
 
+react1.cmx: react1.ml funs.cmx
+	$(OCAMLOPT) -c -thread $< -o $@
+
 hello.cmx: hello.ml
 	$(OCAMLOPT) -c -thread $< -o $@
 
@@ -76,12 +79,15 @@ hello.cmx: hello.ml
 hello.native: brick.o wrap.o mailbox.o funs.cmx hello.cmx
 	$(OCAMLOPT) -linkpkg $(OCAMLOPT_TARGET_OPTS) $^ -o $@
 
-hello.tar.xz: hello.native
-	tar --xz -cf threads.tar.xz hello.native
+react1.native: brick.o wrap.o mailbox.o funs.cmx react1.cmx
+	$(OCAMLOPT) -linkpkg $(OCAMLOPT_TARGET_OPTS) $^ -o $@
+
+hello.tar.xz: hello.native react1.native
+	tar --xz -cvf $^
 	#cp hello.byte ~/h
 
 clean:
-	$(RM) -r *.o *.cm[ioax] hello.byte hello.native *.ii *.s
+	$(RM) -rf *.o *.cm[ioax] hello.byte hello.native react1.native
 
 # depends
 hello.cmo: funs.cmo

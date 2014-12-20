@@ -7,5 +7,5 @@
 .\#*
 # symlinks to trik runtime
 /libs
-makeenv
+trikenv
 
